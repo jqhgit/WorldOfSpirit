@@ -40,7 +40,7 @@ func read_loop_string(conn net.Conn) {
 
 func main (){
 
-	var netImp Net_normal
+	var netImp NormalNetwork
 	conn,err := netImp.Connect(TCP, "127.0.0.1", 44352)
 	if nil != err {
 		LogDebug(err.Error())

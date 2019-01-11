@@ -6,12 +6,12 @@ import (
 	"strconv"
 )
 
-type Net_normal struct {
+type NormalNetwork struct {
 
 }
 
-func (normal *Net_normal) Listen(network_type int, port int) error {
-	var network = networkconv.ToString(network_type)
+func (normal *NormalNetwork) Listen(networkType int, port int, connect HandleConnect, disconnect HandleDisconnect) error {
+	var network = networkconv.ToString(networkType)
 	var address = "localhost:"+strconv.Itoa(port)
 
 	//begin to listen
@@ -36,14 +36,14 @@ func (normal *Net_normal) Listen(network_type int, port int) error {
 
 		//client connected
 		LogDebug(conn.RemoteAddr().String(), " ", network, " connect success")
-		go normal.HnaldCilentConnection(conn)
+		go connect(conn, disconnect)
 	}
 
 	return nil
 }
 
-func (normal *Net_normal) Connect(network_type int, ip string, port int) (net.Conn, error) {
-	var network = networkconv.ToString(network_type)
+func (normal *NormalNetwork) Connect(networkType int, ip string, port int) (net.Conn, error) {
+	var network = networkconv.ToString(networkType)
 	var address = ip+":"+strconv.Itoa(port)
 
 	//begin to dial
@@ -57,29 +57,4 @@ func (normal *Net_normal) Connect(network_type int, ip string, port int) (net.Co
 	LogDebug("dial to ", address, " successfully.")
 
 	return conn, nil
-}
-
-func (normal *Net_normal) HnaldCilentConnection(conn net.Conn) {
-	defer conn.Close()
-
-	remote := conn.RemoteAddr()
-	for {
-		//test receive
-		buf := make([]byte,1024)
-		len,err := conn.Read(buf)
-		if err != nil {
-			break
-		}
-		if buf == nil || len <= 0 {
-			break
-		}
-		text := string(buf[:len])
-		LogDebug("receive form ",remote," : ", text)
-
-		//send
-		text = "hello server received the message : " + text
-		conn.Write([]byte(text))
-	}
-
-	LogDebug("disconnect remote:",remote)
 }
